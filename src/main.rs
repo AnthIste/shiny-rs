@@ -38,9 +38,8 @@ fn main() {
     let frame = gfx::Frame::new(w as u16, h as u16);
 
     let device = gfx::GlDevice::new(|s| glfw.get_proc_address(s));
-    let mut graphics = gfx::Graphics::new(device);
 
-    let mut my_graphics = ::graphics::MyGraphics::new(&mut graphics);
+    let mut my_graphics = ::graphics::MyGraphics::new(device);
 
     while !window.should_close() {
         glfw.poll_events();

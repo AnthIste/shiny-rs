@@ -60,14 +60,14 @@ GLSL_150: b"
 "
 };
 
-pub struct MyGraphics<'a, G: 'a> {
-    graphics: &'a mut G
+pub struct MyGraphics<G> {
+    graphics: G
 }
 
-impl<'a, D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<'a, gfx::Graphics<D, C>> {
-    pub fn new(graphics: &'a mut gfx::Graphics<D, C>) -> MyGraphics<'a, gfx::Graphics<D, C>> {
+impl<D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<gfx::Graphics<D, C>> {
+    pub fn new(device: D) -> MyGraphics<gfx::Graphics<D, C>> {
         MyGraphics {
-            graphics: graphics
+            graphics: gfx::Graphics::new(device)
         }
     }
 
