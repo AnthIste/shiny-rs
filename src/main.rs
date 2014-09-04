@@ -8,7 +8,7 @@ extern crate glfw;
 extern crate native;
 
 use glfw::Context;
-use graphics::MyGraphics;
+use graphics::Scene;
 use simulation::MySimulation;
 
 mod simulation;
@@ -49,33 +49,40 @@ fn main() {
         stencil: None,
     };
 
-    let (mut my_graphics, mut my_simulation) = init();
+    // The meat and potatos: what we are drawing (simulation) and how we draw it (scene)
+    let (mut scene, mut simulation) = init();
 
     while !window.should_close() {
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
             match event {
-                glfw::KeyEvent(glfw::KeyEscape, _, glfw::Press, _) =>
-                    window.set_should_close(true),
-                _ => {},
+                // Escape to close
+                glfw::KeyEvent(glfw::KeyEscape, _, glfw::Press, _) => {
+                    window.set_should_close(true);
+                },
+
+                // Space to spawn a new particle
+                glfw::KeyEvent(glfw::KeySpace, _, glfw::Press, _) => {
+                    simulation.spawn();
+                },
+                _ => {}
             }
         }
 
-        my_simulation.update(0f32);
+        // We don't have a timer so we progress by 0ms each frame
+        simulation.update(0f32);
 
         graphics.clear(clear_data, &frame);
-        my_graphics.render(&mut graphics, &frame, &my_simulation);
+        scene.render(&mut graphics, &frame, &simulation);
         graphics.end_frame();
 
         window.swap_buffers();
     }
 }
 
-fn init<D: gfx::Device<C>, C: gfx::CommandBuffer>() -> (MyGraphics<gfx::Graphics<D, C>>, MySimulation) {
-    let graphics = MyGraphics::new();
-    let mut simulation = MySimulation::new();
+fn init<D: gfx::Device<C>, C: gfx::CommandBuffer>() -> (Scene<gfx::Graphics<D, C>>, MySimulation) {
+    let scene = Scene::new();
+    let simulation = MySimulation::new();
 
-    simulation.spawn();
-
-    (graphics, simulation)
+    (scene, simulation)
 }

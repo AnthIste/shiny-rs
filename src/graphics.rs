@@ -1,6 +1,6 @@
 extern crate gfx;
 
-use gfx::{DeviceHelper, ToSlice};
+use gfx::{Graphics, Device, DeviceHelper, CommandBuffer, ToSlice, Frame};
 use simulation::{MySimulation, TriangleParticle};
 
 #[vertex_format]
@@ -61,14 +61,14 @@ GLSL_150: b"
 "
 };
 
-pub struct MyGraphics<G>;
+pub struct Scene<G>;
 
-impl<D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<gfx::Graphics<D, C>> {
-    pub fn new() -> MyGraphics<gfx::Graphics<D, C>> {
-        MyGraphics
+impl<D: Device<C>, C: CommandBuffer> Scene<Graphics<D, C>> {
+    pub fn new() -> Scene<Graphics<D, C>> {
+        Scene
     }
 
-    pub fn render(&mut self, graphics: &mut gfx::Graphics<D, C>, frame: &gfx::Frame, simulation: &MySimulation) {
+    pub fn render(&mut self, graphics: &mut Graphics<D, C>, frame: &Frame, simulation: &MySimulation) {
         let program = graphics.device.link_program(VERTEX_SRC.clone(), FRAGMENT_SRC.clone()).unwrap();
 
         for tri in simulation.triangles() {
@@ -82,11 +82,11 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<gfx::Graphics<D, C>> {
     }
 }
 
-trait ToMesh<D: gfx::Device<C>, C: gfx::CommandBuffer> {
+trait ToMesh<D: Device<C>, C: CommandBuffer> {
     fn to_mesh(&self, device: &mut D) -> gfx::Mesh;
 }
 
-impl<D: gfx::Device<C>, C: gfx::CommandBuffer> ToMesh<D, C> for TriangleParticle {
+impl<D: Device<C>, C: CommandBuffer> ToMesh<D, C> for TriangleParticle {
     fn to_mesh(&self, device: &mut D) -> gfx::Mesh {
         let vertex_data = vec![
             Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
