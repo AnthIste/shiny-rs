@@ -11,6 +11,7 @@ use glfw::Context;
 
 mod simulation;
 mod graphics;
+mod vector;
 
 // We need to run on the main thread for GLFW, so ensure we are using the `native` runtime. This is
 // technically not needed, since this is the default, but it's not guaranteed.
