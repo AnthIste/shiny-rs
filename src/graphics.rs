@@ -61,40 +61,27 @@ GLSL_150: b"
 "
 };
 
-pub struct MyGraphics<'a, G: 'a> {
-    graphics: &'a mut G
-}
+pub struct MyGraphics;
 
-impl<'a, D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<'a, gfx::Graphics<D, C>> {
-    pub fn new(graphics: &'a mut gfx::Graphics<D, C>) -> MyGraphics<'a, gfx::Graphics<D, C>> {
-        MyGraphics {
-            graphics: graphics
-        }
+impl MyGraphics {
+    pub fn new() -> MyGraphics {
+        MyGraphics
     }
 
-    pub fn render(&mut self, frame: &gfx::Frame, simulation: &MySimulation) {
+    pub fn render<D: gfx::Device<C>, C: gfx::CommandBuffer>(&mut self, graphics: &mut gfx::Graphics<D, C>, frame: &gfx::Frame, simulation: &MySimulation) {
         let vertex_data = vec![
             Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
             Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
             Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] },
         ];
-        let mesh = self.graphics.device.create_mesh(vertex_data);
+        let mesh = graphics.device.create_mesh(vertex_data);
         let slice = mesh.to_slice(gfx::TriangleList);
 
-        let program = self.graphics.device.link_program(VERTEX_SRC.clone(), FRAGMENT_SRC.clone())
-                                 .unwrap();
+        let program = graphics.device.link_program(VERTEX_SRC.clone(), FRAGMENT_SRC.clone()).unwrap();
 
-        let batch: gfx::batch::RefBatch<(), ()> = self.graphics.make_batch(
+        let batch: gfx::batch::RefBatch<(), ()> = graphics.make_batch(
             &program, &mesh, slice, &gfx::DrawState::new()).unwrap();
 
-        let clear_data = gfx::ClearData {
-            color: Some([0.3, 0.3, 0.3, 1.0]),
-            depth: None,
-            stencil: None,
-        };
-
-        self.graphics.clear(clear_data, frame);
-        self.graphics.draw(&batch, &(), frame);
-        self.graphics.end_frame();
+        graphics.draw(&batch, &(), frame);
     }
 }

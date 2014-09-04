@@ -41,8 +41,15 @@ fn main() {
     let device = gfx::GlDevice::new(|s| glfw.get_proc_address(s));
     let mut graphics = gfx::Graphics::new(device);
 
-    let mut my_graphics = ::graphics::MyGraphics::new(&mut graphics);
+    let mut my_graphics = ::graphics::MyGraphics::new();
     let mut my_simulation = ::simulation::MySimulation::new();
+
+    let clear_data = gfx::ClearData {
+        color: Some([0.3, 0.3, 0.3, 1.0]),
+        depth: None,
+        stencil: None,
+    };
+
 
     while !window.should_close() {
         glfw.poll_events();
@@ -55,7 +62,10 @@ fn main() {
         }
 
         my_simulation.update(0f32);
-        my_graphics.render(&frame, &my_simulation);
+
+        graphics.clear(clear_data, &frame);
+        my_graphics.render(&mut graphics, &frame, &my_simulation);
+        graphics.end_frame();
 
         window.swap_buffers();
     }
