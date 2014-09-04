@@ -67,11 +67,15 @@ pub struct ScatterSystem<T> {
 	ps: Vec<T>,
 }
 
-impl<T> ScatterSystem<T> {
+impl<T: Particle + Particle2D> ScatterSystem<T> {
 	pub fn new() -> ScatterSystem<T> {
 		ScatterSystem {
 			ps: Vec::new(),
 		}
+	}
+
+	pub fn particles(&self) -> Iterator<T> {
+		self.ps.iter() as Iterator<T>
 	}
 }
 
@@ -90,5 +94,21 @@ impl<T: Particle + Particle2D> ParticleSystem for ScatterSystem<T> {
 		for p in self.ps.mut_iter() {
 			p.update(dt);
 		}
+	}
+}
+
+pub struct MySimulation {
+	scattered_triangles: ScatterSystem<TriangleParticle>,
+}
+
+impl MySimulation {
+	pub fn new() -> MySimulation {
+		MySimulation {
+			scattered_triangles: ScatterSystem::new(),
+		}
+	}
+
+	pub fn update(&mut self, dt: f32) {
+		self.scattered_triangles.update(dt);
 	}
 }

@@ -1,6 +1,7 @@
 extern crate gfx;
 
 use gfx::{DeviceHelper, ToSlice};
+use simulation::MySimulation;
 
 #[vertex_format]
 struct Vertex {
@@ -71,7 +72,7 @@ impl<'a, D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<'a, gfx::Graphics<
         }
     }
 
-    pub fn render(&mut self, frame: &gfx::Frame) {
+    pub fn render(&mut self, frame: &gfx::Frame, simulation: &MySimulation) {
         let vertex_data = vec![
             Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
             Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },

@@ -42,6 +42,7 @@ fn main() {
     let mut graphics = gfx::Graphics::new(device);
 
     let mut my_graphics = ::graphics::MyGraphics::new(&mut graphics);
+    let mut my_simulation = ::simulation::MySimulation::new();
 
     while !window.should_close() {
         glfw.poll_events();
@@ -53,7 +54,8 @@ fn main() {
             }
         }
 
-        my_graphics.render(&frame);
+        my_simulation.update(0f32);
+        my_graphics.render(&frame, &my_simulation);
 
         window.swap_buffers();
     }
