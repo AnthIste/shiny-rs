@@ -69,8 +69,7 @@ fn main() {
             }
         }
 
-        // We don't have a timer so we progress by 0ms each frame
-        simulation.update(0f32);
+        simulation.update(0.1f32);
 
         graphics.clear(clear_data, &frame);
         scene.render(&mut graphics, &frame, &simulation);

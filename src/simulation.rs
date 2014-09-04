@@ -2,6 +2,8 @@ use std::slice::Items;
 
 use vector::Vec2;
 
+static TIME_SCALE_FACTOR: f32 = 0.01f32;
+
 pub trait Particle {
 	fn update(&mut self, dt: f32);
 }
@@ -23,15 +25,19 @@ pub trait ParticleSystem {
 }
 
 pub struct TriangleParticle {
-	pos: Vec2<f32>,
-	vel: Vec2<f32>,
+	pub pos: Vec2<f32>,
+	pub vel: Vec2<f32>,
+    pub len: f32,
+    pub col: [f32, ..3],
 }
 
 impl TriangleParticle {
-	fn new(pos: Vec2<f32>) -> TriangleParticle {
+	fn new(pos: Vec2<f32>, vel: Vec2<f32>, _acc: Vec2<f32>) -> TriangleParticle {
 		TriangleParticle {
 			pos: pos,
-			vel: Vec2 { x: 0f32, y: 0f32 },
+			vel: vel,
+            len: 0.2f32,
+            col: [1.0f32, 0f32, 0f32],
 		}
 	}
 }
@@ -45,27 +51,24 @@ impl Particle for TriangleParticle {
 }
 
 impl Particle2D for TriangleParticle {
-	fn new(acc: Vec2<f32>, vel: Vec2<f32>, pos: Vec2<f32>) -> TriangleParticle {
-		TriangleParticle {
-			pos: Vec2 { x: 0f32, y: 0f32 },
-			vel: Vec2 { x: 0f32, y: 0f32 },
-		}
-	}
-
-	fn acc(&self) -> Vec2<f32> {
-		Vec2 { x: 0f32, y: 0f32 }
-	}
-
-	fn vel(&self) -> Vec2<f32> {
-		self.vel
+	fn new(pos: Vec2<f32>, vel: Vec2<f32>, acc: Vec2<f32>) -> TriangleParticle {
+		TriangleParticle::new(pos, vel, acc)
 	}
 
 	fn pos(&self) -> Vec2<f32> {
 		self.pos
 	}
+
+    fn vel(&self) -> Vec2<f32> {
+        self.vel
+    }
+
+    fn acc(&self) -> Vec2<f32> {
+        Vec2 { x: 0f32, y: 0f32 }
+    }
 }
 
-pub struct ScatterSystem<T> {
+pub struct ScatterSystem<T: Particle + Particle2D> {
 	ps: Vec<T>,
 }
 
@@ -83,9 +86,9 @@ impl<T: Particle + Particle2D> ScatterSystem<T> {
 
 impl<T: Particle + Particle2D> ParticleSystem for ScatterSystem<T> {
 	fn spawn(&mut self) {
-		let initial_acc = Vec2 { x: 0f32, y: 0f32 };
-		let initial_vel = Vec2 { x: 0f32, y: 0f32 };
-		let initial_pos = Vec2 { x: 0f32, y: 0f32 };
+		let initial_acc = Vec2 { x: 0.0f32, y: 0.0f32 };
+		let initial_vel = Vec2 { x: 1.0f32, y: 0.0f32 };
+		let initial_pos = Vec2 { x: 0.0f32, y: 0.0f32 };
 		
 		let new_particle = Particle2D::new(initial_acc, initial_vel, initial_pos);
 
@@ -115,7 +118,7 @@ impl MySimulation {
     }
 
 	pub fn update(&mut self, dt: f32) {
-		self.scattered_triangles.update(dt);
+		self.scattered_triangles.update(dt * TIME_SCALE_FACTOR);
 	}
 
     pub fn triangles(&self) -> Items<TriangleParticle> {
