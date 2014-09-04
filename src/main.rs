@@ -8,6 +8,8 @@ extern crate glfw;
 extern crate native;
 
 use glfw::Context;
+use graphics::MyGraphics;
+use simulation::MySimulation;
 
 mod simulation;
 mod graphics;
@@ -41,15 +43,13 @@ fn main() {
     let device = gfx::GlDevice::new(|s| glfw.get_proc_address(s));
     let mut graphics = gfx::Graphics::new(device);
 
-    let mut my_graphics = ::graphics::MyGraphics::new();
-    let mut my_simulation = ::simulation::MySimulation::new();
-
     let clear_data = gfx::ClearData {
         color: Some([0.3, 0.3, 0.3, 1.0]),
         depth: None,
         stencil: None,
     };
 
+    let (mut my_graphics, mut my_simulation) = init();
 
     while !window.should_close() {
         glfw.poll_events();
@@ -69,4 +69,13 @@ fn main() {
 
         window.swap_buffers();
     }
+}
+
+fn init<D: gfx::Device<C>, C: gfx::CommandBuffer>() -> (MyGraphics<gfx::Graphics<D, C>>, MySimulation) {
+    let graphics = MyGraphics::new();
+    let mut simulation = MySimulation::new();
+
+    simulation.spawn();
+
+    (graphics, simulation)
 }

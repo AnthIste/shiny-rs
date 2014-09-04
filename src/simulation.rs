@@ -1,3 +1,5 @@
+use std::slice::Items;
+
 use vector::Vec2;
 
 pub trait Particle {
@@ -74,8 +76,8 @@ impl<T: Particle + Particle2D> ScatterSystem<T> {
 		}
 	}
 
-	pub fn particles(&self) -> Iterator<T> {
-		self.ps.iter() as Iterator<T>
+	pub fn particles(&self) -> Items<T> {
+		self.ps.iter()
 	}
 }
 
@@ -108,7 +110,15 @@ impl MySimulation {
 		}
 	}
 
+    pub fn spawn(&mut self) {
+        self.scattered_triangles.spawn();
+    }
+
 	pub fn update(&mut self, dt: f32) {
 		self.scattered_triangles.update(dt);
 	}
+
+    pub fn triangles(&self) -> Items<TriangleParticle> {
+        self.scattered_triangles.particles()
+    }
 }

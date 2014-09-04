@@ -1,7 +1,7 @@
 extern crate gfx;
 
 use gfx::{DeviceHelper, ToSlice};
-use simulation::MySimulation;
+use simulation::{MySimulation, TriangleParticle};
 
 #[vertex_format]
 struct Vertex {
@@ -61,27 +61,39 @@ GLSL_150: b"
 "
 };
 
-pub struct MyGraphics;
+pub struct MyGraphics<G>;
 
-impl MyGraphics {
-    pub fn new() -> MyGraphics {
+impl<D: gfx::Device<C>, C: gfx::CommandBuffer> MyGraphics<gfx::Graphics<D, C>> {
+    pub fn new() -> MyGraphics<gfx::Graphics<D, C>> {
         MyGraphics
     }
 
-    pub fn render<D: gfx::Device<C>, C: gfx::CommandBuffer>(&mut self, graphics: &mut gfx::Graphics<D, C>, frame: &gfx::Frame, simulation: &MySimulation) {
+    pub fn render(&mut self, graphics: &mut gfx::Graphics<D, C>, frame: &gfx::Frame, simulation: &MySimulation) {
+        let program = graphics.device.link_program(VERTEX_SRC.clone(), FRAGMENT_SRC.clone()).unwrap();
+
+        for tri in simulation.triangles() {
+            let mesh = tri.to_mesh(&mut graphics.device);
+            let slice = mesh.to_slice(gfx::TriangleList);
+            let batch: gfx::batch::RefBatch<(), ()> = graphics.make_batch(
+                &program, &mesh, slice, &gfx::DrawState::new()).unwrap();
+
+            graphics.draw(&batch, &(), frame);
+        }
+    }
+}
+
+trait ToMesh<D: gfx::Device<C>, C: gfx::CommandBuffer> {
+    fn to_mesh(&self, device: &mut D) -> gfx::Mesh;
+}
+
+impl<D: gfx::Device<C>, C: gfx::CommandBuffer> ToMesh<D, C> for TriangleParticle {
+    fn to_mesh(&self, device: &mut D) -> gfx::Mesh {
         let vertex_data = vec![
             Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
             Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
             Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] },
         ];
-        let mesh = graphics.device.create_mesh(vertex_data);
-        let slice = mesh.to_slice(gfx::TriangleList);
 
-        let program = graphics.device.link_program(VERTEX_SRC.clone(), FRAGMENT_SRC.clone()).unwrap();
-
-        let batch: gfx::batch::RefBatch<(), ()> = graphics.make_batch(
-            &program, &mesh, slice, &gfx::DrawState::new()).unwrap();
-
-        graphics.draw(&batch, &(), frame);
+        device.create_mesh(vertex_data)
     }
 }
