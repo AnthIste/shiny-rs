@@ -8,12 +8,12 @@ extern crate glfw;
 extern crate native;
 
 use glfw::Context;
-use graphics::Scene;
+use scene::Scene;
 use simulation::MySimulation;
 
+mod util;
 mod simulation;
-mod graphics;
-mod vector;
+mod scene;
 
 // We need to run on the main thread for GLFW, so ensure we are using the `native` runtime. This is
 // technically not needed, since this is the default, but it's not guaranteed.
@@ -79,7 +79,7 @@ fn main() {
     }
 }
 
-fn init<D: gfx::Device<C>, C: gfx::CommandBuffer>() -> (Scene<gfx::Graphics<D, C>>, MySimulation) {
+fn init<D: gfx::Device<C>, C: gfx::CommandBuffer>() -> (Scene<D, C>, MySimulation) {
     let scene = Scene::new();
     let simulation = MySimulation::new();
 
