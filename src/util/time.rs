@@ -79,13 +79,36 @@ impl FpsCounter {
 
         let df = new_frames - self.current_frames;
         let dt_ns = new_time_ns - self.current_time_ns;
-        let dt_s = dt_ns as f32 / 1000000000f32;
 
-        let fps = df as f32 / dt_s;
+        let fps = df as f32 / dt_ns.to_seconds();
 
         self.current_frames = new_frames;
         self.current_time_ns = new_time_ns;
 
         fps
+    }
+}
+
+/// Interprets self as nanoseconds
+pub trait ToNanoSeconds {
+    fn to_nanoseconds(&self) -> u64;
+}
+
+/// Interprets self as as seconds
+pub trait ToSeconds {
+    fn to_seconds(&self) -> f32;
+}
+
+/// Interprets f32 seconds as u64 nanoseconds - this needs a semantic type!
+impl ToNanoSeconds for f32 {
+    fn to_nanoseconds(&self) -> u64 {
+        (*self * 1_000_000_000f32) as u64
+    }
+}
+
+/// Interprets u64 nanoseconds as f32 seconds - this needs a semantic type!
+impl ToSeconds for u64 {
+    fn to_seconds(&self) -> f32 {
+        *self as f32 / 1_000_000_000f32
     }
 }

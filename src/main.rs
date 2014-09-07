@@ -9,7 +9,7 @@ extern crate native;
 
 use glfw::Context;
 
-use self::util::time::{FixedTimestep, FpsCounter};
+use self::util::time::{FixedTimestep, FpsCounter, ToNanoSeconds, ToSeconds};
 use self::scene::Scene;
 use self::simulation::MySimulation;
 
@@ -58,10 +58,9 @@ fn main() {
     // Time progression for simulation
     let updates_hz = 30.0f32;
     let update_time_s = 1.0f32 / updates_hz;
-    let update_time_ns = update_time_s * 1000000000f32;
 
-    let mut timestep = FixedTimestep::new(update_time_ns as u64);
-    let mut timestep_fps = FixedTimestep::new(1000000000u64);
+    let mut timestep = FixedTimestep::new(update_time_s.to_nanoseconds());
+    let mut timestep_fps = FixedTimestep::new(1_000_000_000u64);
     let mut fps_counter = FpsCounter::new();
 
     while !window.should_close() {
@@ -82,8 +81,7 @@ fn main() {
         }
 
         timestep.tick(|_t: u64, dt: u64| {
-            let dt_s = dt as f32 / 1000000000f32;
-            simulation.update(dt_s);
+            simulation.update(dt.to_seconds());
         });
 
         timestep_fps.tick(|_t: u64, _dt: u64| {
