@@ -50,8 +50,6 @@ impl Particle for TriangleParticle {
 		let acc = Vec2 { x: 0f32, y: 0f32 };
 		self.vel = self.vel + acc * dt;
 		self.pos = self.pos + self.vel * dt;
-
-        println!("dt: {}", dt);
 	}
 }
 

@@ -54,11 +54,12 @@ fn main() {
     // The meat and potatos: what we are drawing (simulation) and how we draw it (scene)
     let (mut scene, mut simulation) = init();
 
-    let updates_per_second = 60.0f32;
-    let time_per_update_s = 1.0f32 / updates_per_second;
-    let dt = time_per_update_s * 1000000000f32;
+    // Time progression for simulation
+    let updates_hz = 30.0f32;
+    let update_time_s = 1.0f32 / updates_hz;
+    let update_time_ns = update_time_s * 1000000000f32;
 
-    let mut timestep = FixedTimestep::new(dt as u64);
+    let mut timestep = FixedTimestep::new(update_time_ns as u64);
 
     while !window.should_close() {
         glfw.poll_events();

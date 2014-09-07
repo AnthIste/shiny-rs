@@ -28,9 +28,9 @@ impl<T: Particle + Particle2D> ScatterSystem<T> {
 
 impl<T: Particle + Particle2D> ParticleSystem for ScatterSystem<T> {
 	fn emit(&mut self) {
-		let initial_acc = Vec2 { x: 0.0f32, y: 0.0f32 };
-		let initial_vel = Vec2 { x: 1.0f32, y: 0.0f32 }; // Move towards right
-		let initial_pos = Vec2 { x: 0.0f32, y: 0.0f32 };
+		let initial_acc = Vec2 { x:  0.0f32, y: 0.0f32 };
+		let initial_vel = Vec2 { x: 20.0f32, y: 0.0f32 }; // Move towards right
+		let initial_pos = Vec2 { x:  0.0f32, y: 0.0f32 };
 		
 		let new_particle = Particle2D::new(initial_acc, initial_vel, initial_pos);
 

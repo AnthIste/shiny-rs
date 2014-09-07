@@ -23,10 +23,9 @@ impl FixedTimestep {
 
     pub fn tick(&mut self, step: |u64, u64|) {
         let new_time = precise_time_ns();
-        let frame_time = new_time - self.current_time_ns;
+        let frame_time = new_time - self.current_time_ns; // Optionally clip
 
-        // Optional: clip frame_time
-
+        self.current_time_ns = new_time;
         self.accumulator += frame_time;
 
         while self.accumulator >= self.dt {
