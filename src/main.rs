@@ -36,6 +36,7 @@ fn main() {
         .expect("Failed to create GLFW window.");
 
     window.make_current();
+    glfw.set_swap_interval(1); // vsync = on
     glfw.set_error_callback(glfw::FAIL_ON_ERRORS);
     window.set_key_polling(true);
 

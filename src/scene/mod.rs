@@ -1,7 +1,7 @@
 extern crate gfx;
 extern crate device; // This feels really dodgy
 
-use self::gfx::{DeviceHelper, ToSlice};
+use gfx::{DeviceHelper, ToSlice};
 
 use simulation::MySimulation;
 use self::mesh::ToMesh;
