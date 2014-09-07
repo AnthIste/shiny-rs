@@ -52,7 +52,8 @@ fn main() {
     };
 
     // The meat and potatos: what we are drawing (simulation) and how we draw it (scene)
-    let (mut scene, mut simulation) = init();
+    let mut scene = Scene::new(&mut graphics);
+    let mut simulation = MySimulation::new();
 
     // Time progression for simulation
     let updates_hz = 30.0f32;
@@ -87,7 +88,7 @@ fn main() {
 
         timestep_fps.tick(|_t: u64, _dt: u64| {
             let fps = fps_counter.fps();
-            println!("FPS: {}", fps);
+            println!("FPS: {0}, Entities: {1}", fps, simulation.triangles().len());
         });
 
         graphics.clear(clear_data, &frame);
@@ -97,11 +98,4 @@ fn main() {
         fps_counter.frame();
         window.swap_buffers();
     }
-}
-
-fn init<D: gfx::Device<C>, C: gfx::CommandBuffer>() -> (Scene<D, C>, MySimulation) {
-    let scene = Scene::new();
-    let simulation = MySimulation::new();
-
-    (scene, simulation)
 }
