@@ -52,3 +52,40 @@ impl FixedTimestep {
         self.accumulator
     }
 }
+
+/// Counts frames over time measured as Frames per Second
+pub struct FpsCounter {
+    frames: u64,
+    current_frames: u64, // Measured no of frames
+    current_time_ns: u64, // Measured time
+}
+
+impl FpsCounter {
+    pub fn new() -> FpsCounter {
+        FpsCounter {
+            frames: 0,
+            current_frames: 0,
+            current_time_ns: precise_time_ns(),
+        }
+    }
+
+    pub fn frame(&mut self) {
+        self.frames += 1;
+    }
+
+    pub fn fps(&mut self) -> f32 {
+        let new_frames = self.frames;
+        let new_time_ns = precise_time_ns();
+
+        let df = new_frames - self.current_frames;
+        let dt_ns = new_time_ns - self.current_time_ns;
+        let dt_s = dt_ns as f32 / 1000000000f32;
+
+        let fps = df as f32 / dt_s;
+
+        self.current_frames = new_frames;
+        self.current_time_ns = new_time_ns;
+
+        fps
+    }
+}

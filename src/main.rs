@@ -9,7 +9,7 @@ extern crate native;
 
 use glfw::Context;
 
-use self::util::time::FixedTimestep;
+use self::util::time::{FixedTimestep, FpsCounter};
 use self::scene::Scene;
 use self::simulation::MySimulation;
 
@@ -60,6 +60,8 @@ fn main() {
     let update_time_ns = update_time_s * 1000000000f32;
 
     let mut timestep = FixedTimestep::new(update_time_ns as u64);
+    let mut timestep_fps = FixedTimestep::new(1000000000u64);
+    let mut fps_counter = FpsCounter::new();
 
     while !window.should_close() {
         glfw.poll_events();
@@ -83,10 +85,16 @@ fn main() {
             simulation.update(dt_s);
         });
 
+        timestep_fps.tick(|_t: u64, _dt: u64| {
+            let fps = fps_counter.fps();
+            println!("FPS: {}", fps);
+        });
+
         graphics.clear(clear_data, &frame);
         scene.render(&mut graphics, &frame, &simulation);
         graphics.end_frame();
 
+        fps_counter.frame();
         window.swap_buffers();
     }
 }
