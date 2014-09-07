@@ -8,8 +8,10 @@ extern crate glfw;
 extern crate native;
 
 use glfw::Context;
-use scene::Scene;
-use simulation::MySimulation;
+
+use self::util::time::FixedTimestep;
+use self::scene::Scene;
+use self::simulation::MySimulation;
 
 mod util;
 mod simulation;
@@ -52,6 +54,12 @@ fn main() {
     // The meat and potatos: what we are drawing (simulation) and how we draw it (scene)
     let (mut scene, mut simulation) = init();
 
+    let updates_per_second = 60.0f32;
+    let time_per_update_s = 1.0f32 / updates_per_second;
+    let dt = time_per_update_s * 1000000000f32;
+
+    let mut timestep = FixedTimestep::new(dt as u64);
+
     while !window.should_close() {
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
@@ -63,13 +71,16 @@ fn main() {
 
                 // Space to spawn a new particle
                 glfw::KeyEvent(glfw::KeySpace, _, glfw::Press, _) => {
-                    simulation.spawn();
+                    simulation.emit_triangles();
                 },
                 _ => {}
             }
         }
 
-        simulation.update(0.1f32);
+        timestep.tick(|_t: u64, dt: u64| {
+            let dt_s = dt as f32 / 1000000000f32;
+            simulation.update(dt_s);
+        });
 
         graphics.clear(clear_data, &frame);
         scene.render(&mut graphics, &frame, &simulation);

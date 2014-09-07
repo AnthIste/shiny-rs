@@ -19,8 +19,8 @@ impl MySimulation {
         }
     }
 
-    pub fn spawn(&mut self) {
-        self.scattered_triangles.spawn();
+    pub fn emit_triangles(&mut self) {
+        self.scattered_triangles.emit();
     }
 
     pub fn update(&mut self, dt: f32) {
