@@ -2,6 +2,9 @@ use util::vector::Vec2;
 
 /// Main particle trait - a particle updates over time
 pub trait Particle {
+    /// Particles have identity
+    fn id(&self) -> u64;
+
     fn update(&mut self, dt: f32);
 }
 
@@ -28,6 +31,7 @@ pub trait ParticleColorUniform {
 
 /// A particle with very basic update behavior and uniform properties
 pub struct TriangleParticle {
+    id: u64,
 	pub pos: Vec2<f32>,
 	pub vel: Vec2<f32>,
     pub len: f32,
@@ -37,6 +41,7 @@ pub struct TriangleParticle {
 impl TriangleParticle {
 	fn new(pos: Vec2<f32>, vel: Vec2<f32>, _acc: Vec2<f32>) -> TriangleParticle {
 		TriangleParticle {
+            id: 0, // FIXME
 			pos: pos,
 			vel: vel,
             len: 0.2f32,
@@ -46,6 +51,10 @@ impl TriangleParticle {
 }
 
 impl Particle for TriangleParticle {
+    fn id(&self) -> u64 {
+        self.id
+    }
+
 	fn update(&mut self, dt: f32) {
 		let acc = Vec2 { x: 0f32, y: 0f32 };
 		self.vel = self.vel + acc * dt;

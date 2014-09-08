@@ -2,11 +2,13 @@ extern crate cgmath;
 extern crate gfx;
 extern crate device; // This feels really dodgy
 
+use std::collections::HashMap;
 use self::cgmath::{FixedArray, Matrix, Point3, Vector3}; // Why do these need 'self' but not gfx???
 use self::cgmath::{Transform, AffineMatrix3};
 use gfx::{DeviceHelper, ToSlice};
 
 use simulation::MySimulation;
+use simulation::particle::{Particle, TriangleParticle};
 use self::mesh::ToMesh;
 use self::shader::{CubeBatch, Params};
 
@@ -17,6 +19,7 @@ type ShaderProgram = device::Handle<u32, gfx::ProgramInfo>;
 
 pub struct Scene<D: gfx::Device<C>, C: gfx::CommandBuffer> {
     shader_program: ShaderProgram,
+    triangle_meshes: HashMap<u64, gfx::Mesh>,
 }
 
 impl<D: gfx::Device<C>, C: gfx::CommandBuffer> Scene<D, C> {
@@ -27,12 +30,13 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> Scene<D, C> {
 
         Scene {
             shader_program: shader_program,
+            triangle_meshes: HashMap::new(),
         }
     }
 
     pub fn render(&mut self, graphics: &mut gfx::Graphics<D, C>, frame: &gfx::Frame, simulation: &MySimulation) {
         for tri in simulation.triangles() {
-            let mesh = tri.to_mesh(&mut graphics.device); // TODO: cache and lookup
+            let mesh = self.get_triangle_mesh(tri, graphics);
             let slice = mesh.to_slice(gfx::TriangleList);
             let batch: CubeBatch = graphics.make_batch(
                 &self.shader_program, &mesh, slice, &gfx::DrawState::new()).unwrap();
@@ -50,6 +54,20 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> Scene<D, C> {
             };
 
             graphics.draw(&batch, &shader_args, frame);
+        }
+    }
+
+    fn get_triangle_mesh(&mut self, tri: &TriangleParticle, graphics: &mut gfx::Graphics<D, C>) -> gfx::Mesh {
+        let key = tri.id();
+
+        match self.triangle_meshes.find_copy(&key) {
+            Some(mesh) => mesh,
+            None => {
+                let mesh = tri.to_mesh(&mut graphics.device);
+                self.triangle_meshes.insert(key, mesh);
+
+                self.triangle_meshes.get_copy(&key) // FIXME: There must be a better way...
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 /// Re-inventing the wheel, incorrectly, so replace me with a library implementation.
+#[deriving(Eq, PartialEq, Hash)]
 pub struct Vec2<T> {
 	pub x: T,
 	pub y: T,
