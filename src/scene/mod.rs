@@ -3,12 +3,12 @@ extern crate gfx;
 extern crate device; // This feels really dodgy
 
 use std::collections::HashMap;
-use self::cgmath::{Transform, FixedArray, Matrix4, Point3, Vector3, AffineMatrix3}; // Why do these need 'self' but not gfx???
+use self::cgmath::{Transform, FixedArray, Matrix, Matrix2, Matrix3, Matrix4, Point3, Vector, Vector2, Vector3, Vector4, AffineMatrix3}; // Why do these need 'self' but not gfx???
 use gfx::{DeviceHelper, ToSlice};
 
 use simulation::MySimulation;
 use simulation::particle::{Particle, TriangleParticle};
-use self::mesh::ToMesh;
+use self::mesh::{ToMesh, ToMatrix};
 use self::shader::{CubeBatch, Params};
 
 mod mesh;
@@ -41,7 +41,12 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> Scene<D, C> {
                 &self.shader_program, &mesh, slice, &gfx::DrawState::new()).unwrap();
 
             // let aspect = 640f32 / 480f32;
-            let model = Matrix4::identity();
+            // let v: Vector3<f32> = Vector2::zero().extend(0.0f32);
+            // let m: Matrix4<f32> = Matrix4::from_translation(&v);
+
+            // let model = Matrix4::identity().mul_v(&v);
+            // let model = m;
+            let model = tri.to_matrix();
             let view: AffineMatrix3<f32> = Transform::look_at(
                 &Point3::new(0.0f32, 0.0f32, 1.0f32), // Position on z axis
                 &Point3::new(0.0f32, 0.0f32, 0.0f32), // Look down to origin
