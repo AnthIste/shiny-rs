@@ -1,7 +1,9 @@
+extern crate cgmath;
+
 use std::slice::Items;
+use self::cgmath::Vector2; // Why is self needed???
 
 use simulation::particle::{Particle, Particle2D};
-use util::vector::Vec2;
 
 /// Main particle system trait - a system emits new particles and updates particles over time
 pub trait ParticleSystem {
@@ -28,9 +30,9 @@ impl<T: Particle + Particle2D> ScatterSystem<T> {
 
 impl<T: Particle + Particle2D> ParticleSystem for ScatterSystem<T> {
 	fn emit(&mut self) {
-		let initial_acc = Vec2 { x:  0.0f32, y: 0.0f32 };
-		let initial_vel = Vec2 { x: 20.0f32, y: 0.0f32 }; // Move towards right
-		let initial_pos = Vec2 { x:  0.0f32, y: 0.0f32 };
+		let initial_acc = Vector2 { x:  0.0f32, y: 0.0f32 };
+		let initial_vel = Vector2 { x: 20.0f32, y: 0.0f32 }; // Move towards right
+		let initial_pos = Vector2 { x:  0.0f32, y: 0.0f32 };
 		
 		let new_particle = Particle2D::new(initial_acc, initial_vel, initial_pos);
 

@@ -77,15 +77,16 @@ fn main() {
                 glfw::KeyEvent(glfw::KeySpace, _, glfw::Press, _) => {
                     simulation.emit_triangles();
                 },
-                _ => {}
+
+                _ => { }
             }
         }
 
-        timestep.tick(|_t: u64, dt: u64| {
+        timestep.tick(|_t, dt| {
             simulation.update(dt.to_seconds());
         });
 
-        timestep_fps.tick(|_t: u64, _dt: u64| {
+        timestep_fps.tick(|_t, _dt| {
             let fps = fps_counter.fps();
             println!("FPS: {0}, Entities: {1}", fps, simulation.triangles().len());
         });
