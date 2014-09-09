@@ -3,8 +3,7 @@ extern crate gfx;
 extern crate device; // This feels really dodgy
 
 use std::collections::HashMap;
-use self::cgmath::{FixedArray, Matrix, Point3, Vector3}; // Why do these need 'self' but not gfx???
-use self::cgmath::{Transform, AffineMatrix3};
+use self::cgmath::{Transform, FixedArray, Matrix4, Point3, Vector3, AffineMatrix3}; // Why do these need 'self' but not gfx???
 use gfx::{DeviceHelper, ToSlice};
 
 use simulation::MySimulation;
@@ -41,16 +40,19 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> Scene<D, C> {
             let batch: CubeBatch = graphics.make_batch(
                 &self.shader_program, &mesh, slice, &gfx::DrawState::new()).unwrap();
 
+            // let aspect = 640f32 / 480f32;
+            let model = Matrix4::identity();
             let view: AffineMatrix3<f32> = Transform::look_at(
-                &Point3::new(1.5f32, -5.0, 3.0),
-                &Point3::new(0f32, 0.0, 0.0),
-                &Vector3::unit_z(),
+                &Point3::new(0.0f32, 0.0f32, 1.0f32), // Position on z axis
+                &Point3::new(0.0f32, 0.0f32, 0.0f32), // Look down to origin
+                &Vector3::unit_y(), // We are rotated 90 degrees along the x axis, so 'up' is on the y axis
             );
-            let aspect = 16f32 / 9f32; // Fixed 16:9
-            let proj = cgmath::perspective(cgmath::deg(45.0f32), aspect, 1.0, 10.0);
+            let projection = cgmath::ortho(-1.0f32, 1.0f32, -1.0f32, 1.0f32, -1.0f32, 1.0f32);
+
+            let mvp = projection * view.mat * model;
 
             let shader_args = Params {
-                transform: proj.mul_m(&view.mat).into_fixed(),
+                transform: mvp.into_fixed(),
             };
 
             graphics.draw(&batch, &shader_args, frame);

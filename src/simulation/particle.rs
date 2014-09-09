@@ -46,7 +46,7 @@ impl TriangleParticle {
             id: 0, // FIXME: seed this
 			pos: pos,
 			vel: vel,
-            len: 0.2f32,
+            len: 1.0f32,
             col: [1.0f32, 0f32, 0f32],
 		}
 	}
