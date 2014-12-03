@@ -21,13 +21,13 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> ToMesh<D, C> for TriangleParticle
     fn to_mesh(&self, device: &mut D) -> gfx::Mesh {
         let len = self.len * GRAPHICS_SCALE_FACTOR;
 
-        let vertex_data = vec![
+        let vertex_data = [
             Vertex { pos: [ -len, -len ], color: self.col },
             Vertex { pos: [  len, -len ], color: self.col },
             Vertex { pos: [  0.0,  len ], color: self.col },
         ];
 
-        device.create_mesh(vertex_data)
+        device.create_mesh(&vertex_data)
     }
 }
 

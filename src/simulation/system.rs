@@ -52,7 +52,7 @@ impl<T: Particle + Particle2D> ParticleSystem for ScatterSystem<T> {
 	}
 
 	fn update(&mut self, dt: f32) {
-		for p in self.ps.mut_iter() {
+		for p in self.ps.iter_mut() {
 			p.update(dt);
 		}
 	}

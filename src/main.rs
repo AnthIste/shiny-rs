@@ -5,7 +5,7 @@ extern crate gfx;
 #[phase(plugin)]
 extern crate gfx_macros;
 extern crate glfw;
-extern crate native;
+// extern crate native;
 
 use glfw::Context;
 
@@ -19,20 +19,20 @@ mod scene;
 
 // We need to run on the main thread for GLFW, so ensure we are using the `native` runtime. This is
 // technically not needed, since this is the default, but it's not guaranteed.
-#[start]
-fn start(argc: int, argv: *const *const u8) -> int {
-     native::start(argc, argv, main)
-}
+// #[start]
+// fn start(argc: int, argv: *const *const u8) -> int {
+//      native::start(argc, argv, main)
+// }
 
 fn main() {
     let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
-    glfw.window_hint(glfw::ContextVersion(3, 2));
-    glfw.window_hint(glfw::OpenglForwardCompat(true));
-    glfw.window_hint(glfw::OpenglProfile(glfw::OpenGlCoreProfile));
+    glfw.window_hint(glfw::WindowHint::ContextVersion(3, 2));
+    glfw.window_hint(glfw::WindowHint::OpenglForwardCompat(true));
+    glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
 
     let (window, events) = glfw
-        .create_window(640, 480, "Triangle example.", glfw::Windowed)
+        .create_window(640, 480, "Triangle example.", glfw::WindowMode::Windowed)
         .expect("Failed to create GLFW window.");
 
     window.make_current();
@@ -47,9 +47,9 @@ fn main() {
     let mut graphics = gfx::Graphics::new(device);
 
     let clear_data = gfx::ClearData {
-        color: Some([0.3, 0.3, 0.3, 1.0]),
-        depth: None,
-        stencil: None,
+        color: [0.3f32, 0.3, 0.3, 1.0],
+        depth: 0.0f32,
+        stencil: 0,
     };
 
     // The meat and potatos: what we are drawing (simulation) and how we draw it (scene)
@@ -69,12 +69,12 @@ fn main() {
         for (_, event) in glfw::flush_messages(&events) {
             match event {
                 // Escape to close
-                glfw::KeyEvent(glfw::KeyEscape, _, glfw::Press, _) => {
+                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _) => {
                     window.set_should_close(true);
                 },
 
                 // Space to spawn a new particle
-                glfw::KeyEvent(glfw::KeySpace, _, glfw::Press, _) => {
+                glfw::WindowEvent::Key(glfw::Key::Space, _, glfw::Action::Press, _) => {
                     simulation.emit_triangles();
                 },
 
@@ -91,7 +91,7 @@ fn main() {
             println!("FPS: {0}, Entities: {1}", fps, simulation.triangles().len());
         });
 
-        graphics.clear(clear_data, &frame);
+        graphics.clear(clear_data, gfx::Mask::empty(), &frame);
         scene.render(&mut graphics, &frame, &simulation);
         graphics.end_frame();
 

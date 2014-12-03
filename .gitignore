@@ -1,5 +1,6 @@
 .DS_Store
-/doc
-target/
+/doc/
+/target/
 Cargo.lock
 *.swp
+*.racertmp

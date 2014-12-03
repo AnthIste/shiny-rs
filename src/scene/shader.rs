@@ -15,7 +15,7 @@ pub struct Params {
     pub transform: [[f32, ..4], ..4],
 }
 
-pub static VERTEX_SRC: gfx::ShaderSource = shaders! {
+pub static VERTEX_SRC: gfx::ShaderSource<'static> = shaders! {
 GLSL_120: b"
     #version 120
 
@@ -46,7 +46,7 @@ GLSL_150: b"
 "
 };
 
-pub static FRAGMENT_SRC: gfx::ShaderSource = shaders! {
+pub static FRAGMENT_SRC: gfx::ShaderSource<'static> = shaders! {
 GLSL_120: b"
     #version 120
 

@@ -36,7 +36,7 @@ impl<D: gfx::Device<C>, C: gfx::CommandBuffer> Scene<D, C> {
     pub fn render(&mut self, graphics: &mut gfx::Graphics<D, C>, frame: &gfx::Frame, simulation: &MySimulation) {
         for tri in simulation.triangles() {
             let mesh = self.get_triangle_mesh(tri, graphics);
-            let slice = mesh.to_slice(gfx::TriangleList);
+            let slice = mesh.to_slice(gfx::PrimitiveType::TriangleList);
             let batch: CubeBatch = graphics.make_batch(
                 &self.shader_program, &mesh, slice, &gfx::DrawState::new()).unwrap();
 
