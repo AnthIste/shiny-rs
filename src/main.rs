@@ -1,101 +1,60 @@
 #![feature(phase)]
 #![crate_name = "shiny"]
 
+extern crate shader_version;
+extern crate current;
+extern crate event;
 extern crate gfx;
 #[phase(plugin)]
 extern crate gfx_macros;
-extern crate glfw;
-// extern crate native;
+extern crate sdl2;
+extern crate sdl2_window;
 
-use glfw::Context;
-
-use self::util::time::{FixedTimestep, FpsCounter, ToNanoSeconds, ToSeconds};
-use self::scene::Scene;
-use self::simulation::MySimulation;
-
-mod util;
-mod simulation;
-mod scene;
-
-// We need to run on the main thread for GLFW, so ensure we are using the `native` runtime. This is
-// technically not needed, since this is the default, but it's not guaranteed.
-// #[start]
-// fn start(argc: int, argv: *const *const u8) -> int {
-//      native::start(argc, argv, main)
-// }
+use current::{ Set };
+use std::cell::RefCell;
+use sdl2_window::Sdl2Window;
+use gfx::{ Device, DeviceHelper, ToSlice };
+use event::{ Events, WindowSettings };
+use event::window::{ CaptureCursor };
 
 fn main() {
-    let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+    let (win_width, win_height) = (640, 480);
+    let mut window = Sdl2Window::new(
+        shader_version::opengl::OpenGL::OpenGL_3_2,
+        WindowSettings {
+            title: "Shiny".to_string(),
+            size: [win_width, win_height],
+            fullscreen: false,
+            exit_on_esc: true,
+            samples: 4,
+        }
+    );
 
-    glfw.window_hint(glfw::WindowHint::ContextVersion(3, 2));
-    glfw.window_hint(glfw::WindowHint::OpenglForwardCompat(true));
-    glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
+    window.set_mut(CaptureCursor(true));
 
-    let (window, events) = glfw
-        .create_window(640, 480, "Triangle example.", glfw::WindowMode::Windowed)
-        .expect("Failed to create GLFW window.");
+    let mut device = gfx::GlDevice::new(|s| unsafe {
+        std::mem::transmute(sdl2::video::gl_get_proc_address(s))
+    });
+    let frame = gfx::Frame::new(win_width as u16, win_height as u16);
 
-    window.make_current();
-    glfw.set_swap_interval(1); // vsync = on
-    glfw.set_error_callback(glfw::FAIL_ON_ERRORS);
-    window.set_key_polling(true);
-
-    let (w, h) = window.get_framebuffer_size();
-    let frame = gfx::Frame::new(w as u16, h as u16);
-
-    let device = gfx::GlDevice::new(|s| glfw.get_proc_address(s));
     let mut graphics = gfx::Graphics::new(device);
 
-    let clear_data = gfx::ClearData {
-        color: [0.3f32, 0.3, 0.3, 1.0],
-        depth: 0.0f32,
-        stencil: 0,
-    };
+    let window = RefCell::new(window);
+    for e in Events::new(&window) {
+        use event::RenderEvent;
 
-    // The meat and potatos: what we are drawing (simulation) and how we draw it (scene)
-    let mut scene = Scene::new(&mut graphics);
-    let mut simulation = MySimulation::new();
-
-    // Time progression for simulation
-    let updates_hz = 30.0f32;
-    let update_time_s = 1.0f32 / updates_hz;
-
-    let mut timestep = FixedTimestep::new(update_time_s.to_nanoseconds());
-    let mut timestep_fps = FixedTimestep::new(1_000_000_000u64);
-    let mut fps_counter = FpsCounter::new();
-
-    while !window.should_close() {
-        glfw.poll_events();
-        for (_, event) in glfw::flush_messages(&events) {
-            match event {
-                // Escape to close
-                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _) => {
-                    window.set_should_close(true);
+        e.render(|args| {
+            graphics.clear(
+                gfx::ClearData {
+                    color: [0.3, 0.3, 0.3, 1.0],
+                    depth: 1.0,
+                    stencil: 0,
                 },
+                gfx::COLOR | gfx::DEPTH,
+                &frame
+            );
 
-                // Space to spawn a new particle
-                glfw::WindowEvent::Key(glfw::Key::Space, _, glfw::Action::Press, _) => {
-                    simulation.emit_triangles();
-                },
-
-                _ => { }
-            }
-        }
-
-        timestep.tick(|_t, dt| {
-            simulation.update(dt.to_seconds());
+            graphics.end_frame();
         });
-
-        timestep_fps.tick(|_t, _dt| {
-            let fps = fps_counter.fps();
-            println!("FPS: {0}, Entities: {1}", fps, simulation.triangles().len());
-        });
-
-        graphics.clear(clear_data, gfx::Mask::empty(), &frame);
-        scene.render(&mut graphics, &frame, &simulation);
-        graphics.end_frame();
-
-        fps_counter.frame();
-        window.swap_buffers();
     }
 }
